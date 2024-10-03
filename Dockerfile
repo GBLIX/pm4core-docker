@@ -1,4 +1,8 @@
-FROM processmaker/pm4-base:1.0.0
+FROM processmaker/pm4-base:2.1.7
+
+RUN apt update && apt install -y php8.1-dev php-pear librdkafka-dev
+RUN pecl install rdkafka
+RUN echo "extension=rdkafka.so" > /etc/php/8.1/cli/conf.d/rdkafka.ini
 
 ARG PM_VERSION
 
