@@ -1,17 +1,29 @@
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ="America/Los_Angeles"
+ENV TZ="America/New_York"
 
 RUN apt update
+RUN apt install -y software-properties-common
+RUN add-apt-repository ppa:ondrej/php
 
+RUN apt update
 # In ubuntu 20.04, installing php without specifying a version installs 7.4 :)
-RUN apt install -y php php-cli php-fpm php-json php-common php-mysql php-zip php-gd php-mbstring php-curl php-xml php-pear php-bcmath php-imagick php-dom php-sqlite3 \
-nginx vim curl unzip wget supervisor cron mysql-client build-essential
+ENV PHPVERSION=8.1
+
+RUN apt install -y php${PHPVERSION}-dev php-cli php-fpm php-json php-common php-mysql php-zip php-gd php-mbstring php-curl php-xml php-pear php-bcmath php-imagick php-dom php-sqlite3 \
+nginx vim curl unzip wget supervisor cron mysql-client build-essential librdkafka-dev
+
+#
+# rdkafka
+#
+RUN pecl install rdkafka
+RUN echo "extension=rdkafka.so" > /etc/php/${PHPVERSION}/cli/conf.d/rdkafka.ini
 
 #
 # node
 #
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+ENV NODEVERSION=18
+RUN curl -sL https://deb.nodesource.com/setup_${NODEVERSION}.x | bash -
 RUN apt -y install nodejs
 
 #
@@ -30,7 +42,7 @@ RUN chmod 0644 /etc/cron.d/laravel-cron && crontab /etc/cron.d/laravel-cron
 #
 # docker client
 #
-ENV DOCKERVERSION=20.10.5
+ENV DOCKERVERSION=27.3.1
 RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKERVERSION}.tgz \
   && tar xzvf docker-${DOCKERVERSION}.tgz --strip 1 \
                  -C /usr/local/bin docker/docker \
@@ -39,7 +51,7 @@ RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${
 #
 # configure php-fpm to run as root
 #
-RUN sed -i 's/www-data/root/g' /etc/php/7.4/fpm/pool.d/www.conf
+RUN sed -i 's/www-data/root/g' /etc/php/${PHPVERSION}/fpm/pool.d/www.conf
 
 #
 # nginx 
