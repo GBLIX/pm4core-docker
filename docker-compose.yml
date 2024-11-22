@@ -1,7 +1,5 @@
-version: "3.8"
 services:
   web:
-    platform: linux/amd64
     image: processmaker/pm4-core:${PM_VERSION}
     ports:
       - ${PM_APP_PORT}:80
@@ -20,10 +18,8 @@ services:
       - mysql
       - redis 
   redis:
-    platform: linux/amd64
     image: redis
   mysql:
-    platform: linux/amd64
     image: mysql:8.0
     restart: always
     environment:
